@@ -16,7 +16,7 @@ namespace RKernel.ConsoleEngine
         {
             while (true)
             {
-                Console.Write(">>> ");
+                Console.Write(Kernel.currentPath + "> ");
                 string query = Console.ReadLine();
                 if (query.StartsWith("pm "))
                 {
@@ -56,11 +56,7 @@ namespace RKernel.ConsoleEngine
                     rmhandler.HandleRMRequest(subq);
                     rmhandler = null;
                 }
-                else if (query.StartsWith("installer"))
-                {
-                    Installer.Installer installer = new Installer.Installer();
-                    installer.Run();
-                }
+                else if 
             }
         }
     }

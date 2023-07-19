@@ -22,6 +22,11 @@ namespace RKernel.ConsoleEngine
             }
             switch (query[1])
             {
+                case "help":
+                    Console.Write("\nUsage:\n");
+                    Console.WriteLine("sfc -verify - initialize file integrity check");
+                    Console.WriteLine("sfc -repair - initialize restoration process\n");
+                    break;
                 case "verify":
                     bool userFileExist = true;
                     bool installFileExist = true;
@@ -155,9 +160,10 @@ namespace RKernel.ConsoleEngine
                             return null;
                         case 1097540862:
                             Log.Warning("Started recovering NoUserFile...");
-                            File.Delete("0:\\RKernel\\user.dat");
                             File.Create("0:\\RKernel\\user.dat").Close();
-                            File.WriteAllLines("0:\\RKernel\\usr.dat", new string[1] { $"{Kernel.UserName}:{Kernel.Passwd}" });
+                            string usr = Kernel.UserName;
+                            string passwd = Kernel.Passwd;
+                            File.WriteAllLines("0:\\RKernel\\usr.dat", Kernel.usrlines);
                             return null;
                     }
                     break;

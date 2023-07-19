@@ -19,6 +19,7 @@ namespace RKernel.ConsoleEngine
             }
             bool hasRecurseArgument = false;
             bool hasTargetArgument = false;
+            bool isHelpRequest = false;
             int indexOfTargetArg = 0;
             for (int i = 1; i < query.Length; i++)
                 if (query[i] == "r")
@@ -33,6 +34,20 @@ namespace RKernel.ConsoleEngine
                     indexOfTargetArg = i;
                     break;
                 }
+            for (int i = 1; i < query.Length; i++)
+            {
+                if (query[i].Contains("help"))
+                {
+                    isHelpRequest = true;
+                    break;
+                }
+            }
+            if (isHelpRequest)
+            {
+                Console.Write("\nUsage:\n");
+                Console.WriteLine("rm -r -target:0:\folder - Remove target recursively");
+                Console.WriteLine("rm -target:0:\file.txt - Remove target\n");
+            }
             if (!hasTargetArgument)
             {
                 Log.Error("Cannot remove object: no \"target\" argument.");

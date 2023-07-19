@@ -19,6 +19,12 @@ namespace RKernel.ConsoleEngine
             }
             switch (query[1])
             {
+                case "help":
+                    Console.Write("\nUsage:\n");
+                    Console.WriteLine("pm -create -drive:0 -size:500 - Create partition on drive 0 with size of 500 mb");
+                    Console.WriteLine("pm -delete -drive:0 -partition:0 - Delete partition 0 on drive 0");
+                    Console.WriteLine("pm -list");
+                    break;
                 case "create":
                     if (query.Length != 4)
                     {
@@ -188,13 +194,46 @@ namespace RKernel.ConsoleEngine
                     }
                     break;
                 case "list":
-                    Console.Write("\n");
-                    for (int i = 0; i < Kernel.fs.Disks.Count; i++)
+                    int indexOfDriveArg2;
+                    int indexOfDrivesArg;
+                    bool hasDriveArgument2 = false;
+                    bool hasDrivesArgument = false;
+                    string[] splittedDriveArgument2;
+                    for (int i = 1; i < query.Length; i++)
                     {
-                        Console.WriteLine("Drive number: " + (i + 1));
-                        Console.WriteLine("Size: " + Kernel.fs.Disks[i].Size / 1024 / 1024 + "MB");
-                        Console.WriteLine("IsMBR: " + Kernel.fs.Disks[i].IsMBR);
-                        Console.WriteLine("Partitions count: " + Kernel.fs.Disks[i].Partitions.Count);
+                        if (query[i].Contains("drives"))
+                        {
+                            hasDrivesArgument = true;
+                            indexOfDrivesArg = i;
+                            i = query.Length;
+                        }
+                    }
+                    if (hasDrivesArgument)
+                    {
+                        Console.Write("\n");
+                        for (int i = 0; i < Kernel.fs.Disks.Count; i++)
+                        {
+                            Console.WriteLine("Drive number: " + (i + 1));
+                            Console.WriteLine("Size: " + Kernel.fs.Disks[i].Size / 1024 / 1024 + "MB");
+                            Console.WriteLine("IsMBR: " + Kernel.fs.Disks[i].IsMBR);
+                            Console.WriteLine("Partitions count: " + Kernel.fs.Disks[i].Partitions.Count);
+                        }
+                        Console.Write("\n");
+                        return;
+                    }
+                    for (int i = 1; i < query.Length; i++)
+                    {
+                        if (query[i].Contains("drive"))
+                        {
+                            hasDriveArgument2 = true;
+                            indexOfDriveArg2 = i;
+                            i = query.Length;
+                        }
+                    }
+                    if (!hasDriveArgument2)
+                    {
+                        Log.Error("Cannot list partition: no \"drive\" argument.");
+                        return;
                     }
                     break;
             }
