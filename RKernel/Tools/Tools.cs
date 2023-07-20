@@ -23,12 +23,7 @@ namespace RKernel.Tools
             for (int i = 0; i < lines; i++)
                 System.Console.WriteLine(' ' * System.Console.WindowWidth);
         }
-        public static bool IsNumberInRange(int num, int first, int second)
-        {
-            if (first <= num && num <= second)
-                return true;
-            return false;
-        }
+        public static bool IsNumberInRange(int num, int first, int second) => (first <= num && num <= second) ? true : false;
         public static void ClearSymbols(int symbols)
         {
             System.Console.SetCursorPosition(System.Console.CursorLeft - symbols, System.Console.CursorTop);

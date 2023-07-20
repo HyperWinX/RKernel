@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cosmos.System.FileSystem;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -23,7 +24,8 @@ namespace RKernel.ConsoleEngine
                     Console.Write("\nUsage:\n");
                     Console.WriteLine("pm -create -drive:0 -size:500 - Create partition on drive 0 with size of 500 mb");
                     Console.WriteLine("pm -delete -drive:0 -partition:0 - Delete partition 0 on drive 0");
-                    Console.WriteLine("pm -list");
+                    Console.WriteLine("pm -list -drives - Get drives list");
+                    Console.WriteLine("pm -list -drive:0 - Get list of partitions on drive 0");
                     break;
                 case "create":
                     if (query.Length != 4)
@@ -194,8 +196,7 @@ namespace RKernel.ConsoleEngine
                     }
                     break;
                 case "list":
-                    int indexOfDriveArg2;
-                    int indexOfDrivesArg;
+                    int indexOfDriveArg2 = 0;
                     bool hasDriveArgument2 = false;
                     bool hasDrivesArgument = false;
                     string[] splittedDriveArgument2;
@@ -204,7 +205,6 @@ namespace RKernel.ConsoleEngine
                         if (query[i].Contains("drives"))
                         {
                             hasDrivesArgument = true;
-                            indexOfDrivesArg = i;
                             i = query.Length;
                         }
                     }
@@ -232,9 +232,46 @@ namespace RKernel.ConsoleEngine
                     }
                     if (!hasDriveArgument2)
                     {
-                        Log.Error("Cannot list partition: no \"drive\" argument.");
+                        Log.Error("Cannot list partitions: no \"drive\" argument.");
                         return;
                     }
+                    splittedDriveArgument2 = query[indexOfDriveArg2].Split(':');
+                    if (splittedDriveArgument2.Length != 2)
+                    {
+                        Log.Error("Cannot list partitions: incorrect usage of \"drive\" argument.");
+                        return;
+                    }
+                    if (string.IsNullOrEmpty(splittedDriveArgument2[1]) ||
+                        string.IsNullOrWhiteSpace(splittedDriveArgument2[1]))
+                    {
+                        Log.Error("Cannot list partitions: incorrect usage of \"drive\" argument.");
+                        return;
+                    }
+                    int drivenum;
+                    if (!Tools.Tools.TryParse(splittedDriveArgument2[1], out drivenum))
+                    {
+                        Log.Error("Cannot list partitions: not a drive number.");
+                        return;
+                    }
+                    if (!Tools.Tools.IsNumberInRange(drivenum, 0, Kernel.fs.Disks.Count))
+                    {
+                        Log.Error("Cannot list partitions: cannot find drive with such number.");
+                        return;
+                    }
+                    try
+                    {
+                        Console.Write("\n");
+                        for (int i = 0; i < Kernel.fs.Disks.Count; i++)
+                        {
+                            Console.WriteLine("Disk number: #" + i);
+                            Console.WriteLine("Block count: " + Kernel.fs.Disks[i].Host.BlockCount);
+                            Console.WriteLine("Block size: " + Kernel.fs.Disks[i].Host.BlockSize);
+                            Console.WriteLine("Size: " + Kernel.fs.Disks[i].Size / 1024 / 1024 + "MB");
+                            Console.WriteLine("IsMBR: " + Kernel.fs.Disks[i].IsMBR);
+                        }
+                        Console.Write("\n");
+                        return;
+                    } catch { }
                     break;
             }
         }

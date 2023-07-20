@@ -105,7 +105,7 @@ namespace RKernel
             }
             bootlog.Add("Correct password was entered after " + its + " tries.");
             File.Create("0:\\RKernel\\log").Close();
-            File.WriteAllLines("0:\\RKernel\\log", bootlog);
+            File.WriteAllLines("0:\\RKernel\\log", bootlog.ToArray());
             bootlog.Clear();
             bootlog = null;
             Console.Clear();
