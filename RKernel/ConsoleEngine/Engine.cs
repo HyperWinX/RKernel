@@ -58,11 +58,16 @@ namespace RKernel.ConsoleEngine
                 }
                 else if (query.StartsWith("mkdir "))
                 {
-                    string[] subq = query.Split('-');
+                    string[] subq = query.Split(' ');
                     for (int i = 0; i < subq.Length; i++)
                         subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
                     MKDIRHandler mkdirhandler = new MKDIRHandler();
-                   
+                    mkdirhandler.HandleMKDIRRequest(subq);
+                }
+                else if (query == "ls")
+                {
+                    LSHandler lshandler = new LSHandler();
+                    lshandler.HandleLSRequest();
                 }
             }
         }
