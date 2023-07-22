@@ -79,19 +79,25 @@ namespace RKernel.ConsoleEngine
                     if (userFileExist)
                     {
                         string[] lines = File.ReadAllLines("0:\\RKernel\\user.dat");
-                        if (lines.Length != 1)
+                        if (lines.Length != 3)
                         {
                             errorIDs.Add(ErrorIDs.ids["CorruptedUserData"]);
                             Log.Error("Corrupted data in user file.");
                             return errorIDs;
                         }
-                        if (lines[0].Split(':')[0] != Kernel.UserName)
+                        if (lines[0].Split('=')[1] != Kernel.UserName)
                         {
                             errorIDs.Add(ErrorIDs.ids["CorruptedUserData"]);
                             Log.Error("Corrupted data in user file.");
                             return errorIDs;
                         }
-                        if (lines[0].Split(':')[1] != Kernel.Passwd)
+                        if (lines[1].Split('=')[1] != Kernel.Passwd)
+                        {
+                            errorIDs.Add(ErrorIDs.ids["CorruptedUserData"]);
+                            Log.Error("Corrupted data in user file.");
+                            return errorIDs;
+                        }
+                        if (lines[2].Split('=')[1] != Kernel.RootPasswd)
                         {
                             errorIDs.Add(ErrorIDs.ids["CorruptedUserData"]);
                             Log.Error("Corrupted data in user file.");
@@ -156,7 +162,7 @@ namespace RKernel.ConsoleEngine
                         case 912971925:
                             Log.Warning("Started recovering CorruptedUserData...");
                             File.WriteAllLines("0:\\RKernel\\user.dat", null);
-                            File.WriteAllLines("0:\\RKernel\\usr.dat", new string[1] { $"{Kernel.UserName}:{Kernel.Passwd}" });
+                            File.WriteAllLines("0:\\RKernel\\usr.dat", new string[3] { $"Username={Kernel.UserName}", $"Password={Kernel.Passwd}", $"RootPassword={Kernel.RootPasswd}" });
                             return null;
                         case 1097540862:
                             Log.Warning("Started recovering NoUserFile...");

@@ -165,7 +165,18 @@ namespace RKernel.Installer
             System.Console.SetCursorPosition(4, 9);
             string password = "";
             password = System.Console.ReadLine();
-            return new string[2] { username, password };
+            System.Console.Clear();
+            DrawTitle(); //title
+            System.Console.Write(" " + new string('#', 88) + "\n"); //first line
+            System.Console.Write(" #" + new string(' ', 86) + "#\n"); //just bias
+            System.Console.Write(" # Create new root password:" + new string(' ', 60) + "#\n");
+            System.Console.Write(" # > " + new string(' ', 83) + "#\n");
+            System.Console.Write(" #" + new string(' ', 86) + "# "); //just bias
+            System.Console.Write(" " + new string('#', 88) + "\n"); //first line
+            System.Console.SetCursorPosition(4, 9);
+            string rootpassword = "";
+            rootpassword = System.Console.ReadLine();
+            return new string[3] { username, password, rootpassword };
         }
     }
 }

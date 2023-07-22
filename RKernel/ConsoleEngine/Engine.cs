@@ -16,7 +16,7 @@ namespace RKernel.ConsoleEngine
         {
             while (true)
             {
-                Console.Write(Kernel.currentPath + "> ");
+                Console.Write(Kernel.currentMode + Kernel.currentPath + "> ");
                 string query = Console.ReadLine();
                 if (query.StartsWith("pm "))
                 {
@@ -49,7 +49,7 @@ namespace RKernel.ConsoleEngine
                 }
                 else if (query.StartsWith("rm "))
                 {
-                    string[] subq = query.Split('-');
+                    string[] subq = query.Split(' ');
                     for (int i = 0; i < subq.Length; i++)
                         subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
                     RMHandler rmhandler = new RMHandler();
@@ -68,6 +68,10 @@ namespace RKernel.ConsoleEngine
                 {
                     LSHandler lshandler = new LSHandler();
                     lshandler.HandleLSRequest();
+                }
+                else if (query == "su")
+                {
+
                 }
             }
         }

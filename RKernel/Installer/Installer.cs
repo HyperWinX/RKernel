@@ -65,7 +65,7 @@ namespace RKernel.Installer
             File.Create(@"0:\RKernel\currentinstall.dat").Close();
             File.WriteAllLines(@"0:\RKernel\currentinstall.dat", new string[2] { "OSname=RKernel", "Version=0.1a" });
             File.Create("0:\\RKernel\\user.dat").Close();
-            File.WriteAllLines("0:\\RKernel\\user.dat", new string[1] { $"{userdata[0]}:{userdata[1]}" });
+            File.WriteAllLines("0:\\RKernel\\user.dat", new string[3] { $"Username={userdata[0]}", $"Password={userdata[1]}", $"RootPassword={userdata[2]}" });
             Console.WriteLine("Installation completed. Rebooting...");
             Thread.Sleep(2000);
             Cosmos.System.Power.Reboot();

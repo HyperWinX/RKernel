@@ -21,7 +21,7 @@ namespace RKernel.ConsoleEngine
             bool isHelpRequest = false;
             string path;
             for (int i = 1; i < query.Length; i++)
-                if (query[i] == "r")
+                if (query[i] == "-r")
                 {
                     hasRecurseArgument = true;
                     break;
