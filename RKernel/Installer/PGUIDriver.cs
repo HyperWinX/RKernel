@@ -12,8 +12,8 @@ namespace RKernel.Installer
         }
         public void DrawTitle()
         {
-            System.Console.Write(new string(' ', 34));
-            System.Console.WriteLine("AntHill OS Installer");
+            System.Console.Write(new string(' ', 36));
+            System.Console.WriteLine("RKernel Installer");
             System.Console.Write("\n\n\n\n\n");
         }
         public void DrawPartitionTable(List<string> partitions, int selection = 1)

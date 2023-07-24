@@ -17,6 +17,7 @@ namespace RKernel.Installer
         }
         public void Run()
         {
+            Console.Clear();
             Console.SetWindowSize(90, 30);
             DiskSelector dselector = new DiskSelector(driver);
             disk = dselector.Run();
@@ -50,12 +51,11 @@ namespace RKernel.Installer
             if (!File.Exists("0:\\test"))
             {
                 Log.Error("Partition is not accessible. Please configure partitions manually.");
-                Thread.Sleep(2000);
-                System.Console.ForegroundColor = System.ConsoleColor.White;
-                System.Console.BackgroundColor = System.ConsoleColor.Black;
-                System.Console.Clear();
+                Thread.Sleep(5000);
+                Cosmos.System.Power.Shutdown();
             }
-            File.Delete("0:\\test");
+            else
+                File.Delete("0:\\test");
             Console.WriteLine("Installing system...");
             foreach (var directory in Directory.GetDirectories("0:\\"))
                 Directory.Delete(directory, true);
@@ -67,7 +67,7 @@ namespace RKernel.Installer
             File.Create("0:\\RKernel\\user.dat").Close();
             File.WriteAllLines("0:\\RKernel\\user.dat", new string[3] { $"Username={userdata[0]}", $"Password={userdata[1]}", $"RootPassword={userdata[2]}" });
             Console.WriteLine("Installation completed. Rebooting...");
-            Thread.Sleep(2000);
+            Thread.Sleep(3000);
             Cosmos.System.Power.Reboot();
         }
         private bool RunPartitionConfiguration(Disk drive)
@@ -77,6 +77,7 @@ namespace RKernel.Installer
                 int partitionCount = drive.Partitions.Count;
                 for (int i = 1; i < partitionCount; i++)
                     drive.DeletePartition(i - 1);
+                drive.Clear();
                 drive.CreatePartition(drive.Size - 1024);
                 drive.FormatPartition(0, "FAT32", false);
                 drive.MountPartition(0);

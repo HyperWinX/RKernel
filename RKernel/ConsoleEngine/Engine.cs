@@ -16,7 +16,7 @@ namespace RKernel.ConsoleEngine
         {
             while (true)
             {
-                Console.Write(Kernel.currentMode + Kernel.currentPath + "> ");
+                Console.Write(Kernel.currentPath + "> ");
                 string query = Console.ReadLine();
                 if (query.StartsWith("pm "))
                 {
@@ -71,7 +71,10 @@ namespace RKernel.ConsoleEngine
                 }
                 else if (query == "su")
                 {
-
+                    SUHandler suhandler = new SUHandler();
+                    suhandler.HandleSURequest();
+                    Console.WriteLine("Now you are root!");
+                    suhandler = null;
                 }
             }
         }

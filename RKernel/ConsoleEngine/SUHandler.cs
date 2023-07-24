@@ -11,13 +11,16 @@ namespace RKernel.ConsoleEngine
         public SUHandler() { }
         public void HandleSURequest()
         {
-            Console.Write("Enter root password: ");
             bool valid = false;
             while (!valid)
             {
+                Console.Write("Enter root password: ");
                 string pass = Console.ReadLine();
-                
+                if (pass == Kernel.RootPasswd)
+                    valid = true;
             }
+            Kernel.currentMode = "[root]";
+            Kernel.IsRoot = true;
         }
     }
 }

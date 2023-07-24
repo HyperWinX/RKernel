@@ -19,6 +19,8 @@ namespace RKernel
         public static string[] usrlines;
         public static string currentPath;
         public static string currentMode;
+        public static bool IsRoot;
+        public static List<string> ProtectedPaths;
         protected override void BeforeRun()
         {
             try { fs = InitializeVFS(); bootlog.Add("VFS initialized"); } catch (Exception ex) { bootlog.Add("Cannot initialize VFS, error: " + ex.Message); bootlog.Add("Shutting down"); }
@@ -129,6 +131,13 @@ namespace RKernel
             Console.WriteLine("Welcome to the " + OSname + " version " + Version + "\n");
             currentPath = "0:\\";
             currentMode = "";
+            IsRoot = false;
+            ProtectedPaths = new List<string>
+            {
+                "0:\\RKernel",
+                "0:\\RKernel\\currentinstall.dat",
+                "0:\\RKernel\\user.dat"
+            };
             //Kernel.PrintDebug(time.ToString());
             //Console.WriteLine("Boot time: " + time.ToString());
             Engine cEngine = new Engine();

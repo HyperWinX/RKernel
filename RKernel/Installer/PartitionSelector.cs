@@ -17,8 +17,6 @@ namespace RKernel.Installer
             this.driver = driver;
             selection = 1;
             partitions = new List<string>();
-            for (int i = 0; i < drive.Partitions.Count; i++)
-                partitions.Add($"Partition #{i + 1}, {(drive.Partitions[i].HasFileSystem ? "FAT32" : "UNKNOWN")}, {(drive.Partitions[i].Host.BlockCount * drive.Partitions[i].Host.BlockSize) / 1024 / 1024}MB");
             partitions.Add("Manage partitions automatically");
         }
         public ManagedPartition Run()

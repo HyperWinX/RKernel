@@ -66,19 +66,17 @@ namespace RKernel.ConsoleEngine
                 {
                     if (Directory.Exists(path))
                     {
-                        Directory.Delete(path, true);
-                        if (!Directory.Exists(path))
-                            Log.Success("Directory successfully removed!");
-                        else
-                            Log.Error("Cannot remove directory!");
+                        if (Kernel.ProtectedPaths.Contains(path) && !Kernel.IsRoot)
+                        {
+                            Log.Error("Not enough permissions to remove directory! Exiting...");
+                            return;
+                        }
+                        try { Directory.Delete(path, true); } catch (Exception ex) { Log.Error(ex.Message); }
                     }
                     else if (File.Exists(path))
                     {
-                        File.Delete(path);
-                        if (!File.Exists(path))
-                            Log.Success("File successfully removed!");
-                        else
-                            Log.Error("Cannot remove file!");
+                        Log.Error("Cannot remove file with -r argument!");
+                        return;
                     }
                     else
                     {
@@ -90,19 +88,21 @@ namespace RKernel.ConsoleEngine
                 {
                     if (Directory.Exists(path))
                     {
-                        Directory.Delete(path);
-                        if (!Directory.Exists(path))
-                            Log.Success("Directory successfully removed!");
-                        else
-                            Log.Error("Cannot remove directory!");
+                        if (Kernel.ProtectedPaths.Contains(path) && !Kernel.IsRoot)
+                        {
+                            Log.Error("Not enough permissions to remove directory! Exiting...");
+                            return;
+                        }
+                        try { Directory.Delete(path); } catch (Exception ex) { Log.Error(ex.Message); }
                     }
                     else if (File.Exists(path))
                     {
-                        File.Delete(path);
-                        if (!File.Exists(path))
-                            Log.Success("File successfully removed!");
-                        else
-                            Log.Error("Cannot remove file!");
+                        if (Kernel.ProtectedPaths.Contains(path) && !Kernel.IsRoot)
+                        {
+                            Log.Error("Not enough permissions to remove file! Exiting...");
+                            return;
+                        }
+                        try { File.Delete(path); } catch (Exception ex) { Log.Error(ex.Message); return; }
                     }
                     else
                     {
