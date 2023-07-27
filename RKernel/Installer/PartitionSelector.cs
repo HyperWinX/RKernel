@@ -33,7 +33,7 @@ namespace RKernel.Installer
                             driver.UpdatePartitionSelection(false, ref selection, partitions);
                         break;
                     case ConsoleKey.DownArrow:
-                        if (selection == partitions.Count + 1)
+                        if (selection == partitions.Count)
                             break;
                         else
                             driver.UpdatePartitionSelection(true, ref selection, partitions);

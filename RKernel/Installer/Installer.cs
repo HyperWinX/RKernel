@@ -18,7 +18,9 @@ namespace RKernel.Installer
         public void Run()
         {
             Console.Clear();
+#pragma warning disable CA1416
             Console.SetWindowSize(90, 30);
+#pragma warning restore CA1416
             DiskSelector dselector = new DiskSelector(driver);
             disk = dselector.Run();
             dselector.Dispose();
@@ -31,7 +33,7 @@ namespace RKernel.Installer
             string[] userdata = usrconf.Run();
             usrconf = null;
             Cosmos.Core.Memory.Heap.Collect();
-            if (partition == null)
+            if (partition != null)
             {
                 if (!RunPartitionConfiguration(disk))
                 {
@@ -44,7 +46,7 @@ namespace RKernel.Installer
             }
             Console.Clear();
             Console.SetCursorPosition(0, 29);
-            Console.WriteLine("Testing partition...");
+            Console.WriteLine("Testing drive...");
             if (File.Exists("0:\\test"))
                 try { File.Delete("0:\\"); } catch { }
             try { File.Create("0:\\test"); } catch { }
@@ -56,16 +58,24 @@ namespace RKernel.Installer
             }
             else
                 File.Delete("0:\\test");
-            Console.WriteLine("Installing system...");
+            Console.Write("Installing system... 0%");
             foreach (var directory in Directory.GetDirectories("0:\\"))
                 Directory.Delete(directory, true);
             foreach (var file in Directory.GetFiles("0:\\"))
                 File.Delete(file);
+            Console.SetCursorPosition(Console.CursorLeft - 2, Console.CursorTop);
+            Console.Write("25%");
             Directory.CreateDirectory(@"0:\RKernel");
+            Console.SetCursorPosition(Console.CursorLeft - 3, Console.CursorTop);
+            Console.Write("50%");
             File.Create(@"0:\RKernel\currentinstall.dat").Close();
             File.WriteAllLines(@"0:\RKernel\currentinstall.dat", new string[2] { "OSname=RKernel", "Version=0.1a" });
+            Console.SetCursorPosition(Console.CursorLeft - 3, Console.CursorTop);
+            Console.Write("75%");
             File.Create("0:\\RKernel\\user.dat").Close();
             File.WriteAllLines("0:\\RKernel\\user.dat", new string[3] { $"Username={userdata[0]}", $"Password={userdata[1]}", $"RootPassword={userdata[2]}" });
+            Console.SetCursorPosition(Console.CursorLeft - 3, Console.CursorTop);
+            Console.WriteLine("100%");
             Console.WriteLine("Installation completed. Rebooting...");
             Thread.Sleep(3000);
             Cosmos.System.Power.Reboot();
@@ -77,7 +87,8 @@ namespace RKernel.Installer
                 int partitionCount = drive.Partitions.Count;
                 for (int i = 1; i < partitionCount; i++)
                     drive.DeletePartition(i - 1);
-                drive.Clear();
+                if (!drive.IsMBR)
+                    return false;
                 drive.CreatePartition(drive.Size - 1024);
                 drive.FormatPartition(0, "FAT32", false);
                 drive.MountPartition(0);

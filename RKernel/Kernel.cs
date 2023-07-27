@@ -1,4 +1,5 @@
-﻿using Cosmos.System.FileSystem;
+﻿using Cosmos.HAL.Drivers.Video.SVGAII;
+using Cosmos.System.FileSystem;
 using RKernel.ConsoleEngine;
 using RKernel.Installer;
 using System;
@@ -14,13 +15,12 @@ namespace RKernel
     {
         public static Cosmos.System.FileSystem.CosmosVFS fs;
         public static string OSname, Version, UserName, Passwd, RootPasswd;
-        private static TimeSpan time;
         List<string> bootlog;
         public static string[] usrlines;
         public static string currentPath;
         public static string currentMode;
         public static bool IsRoot;
-        public static List<string> ProtectedPaths;
+        public static List<int> ProtectedPaths;
         protected override void BeforeRun()
         {
             try { fs = InitializeVFS(); bootlog.Add("VFS initialized"); } catch (Exception ex) { bootlog.Add("Cannot initialize VFS, error: " + ex.Message); bootlog.Add("Shutting down"); }
@@ -57,6 +57,7 @@ namespace RKernel
             if (!found)
             {
                 bootlog.Add("Not found user configuration file! Shutting down...");
+                File.Create("0:\\RKernel\\currentinstall.dat").Close();
                 File.WriteAllLines("0:\\RKernel\\currentinstall.dat", null);
                 File.WriteAllLines("0:\\RKernel\\currentinstall.dat", new string[1] { "corrupted" });
                 RaiseCriticalKernelError("Can't find user configuration file!");
@@ -76,15 +77,14 @@ namespace RKernel
             lines = File.ReadAllLines("0:\\RKernel\\user.dat");
             if (lines.Length != 3)
             {
-                File.WriteAllLines("0:\\RKernel\\currentinstall.dat", null);
-                File.WriteAllLines("0:\\RKernel\\currentinstall.dat", new string[1] { "corrupted" });
+                File.WriteAllLines("0:\\RKernel\\user.dat", null);
+                File.WriteAllLines("0:\\RKernel\\user.dat", new string[1] { "corrupted" });
                 RaiseCriticalKernelError("Corrupted user configuration file!");
             }
             UserName = lines[0].Split('=')[1];
             Passwd = lines[1].Split('=')[1];
             RootPasswd = lines[2].Split('=')[1];
             usrlines = lines;
-            //time = bootTime.TimeOfDay.Subtract(DateTime.Now.TimeOfDay);
         }
 
         protected override void Run()
@@ -132,11 +132,11 @@ namespace RKernel
             currentPath = "0:\\";
             currentMode = "";
             IsRoot = false;
-            ProtectedPaths = new List<string>
+            ProtectedPaths = new List<int>
             {
-                "0:\\RKernel",
-                "0:\\RKernel\\currentinstall.dat",
-                "0:\\RKernel\\user.dat"
+                @"0:\RKernel".GetHashCode(),
+                @"0:\RKernel\currentinstall.dat".GetHashCode(),
+                @"0:\RKernel\user.dat".GetHashCode()
             };
             //Kernel.PrintDebug(time.ToString());
             //Console.WriteLine("Boot time: " + time.ToString());

@@ -20,61 +20,126 @@ namespace RKernel.ConsoleEngine
                 string query = Console.ReadLine();
                 if (query.StartsWith("pm "))
                 {
-                    string[] subq = query.Split('-');
-                    for (int i = 0; i < subq.Length; i++)
-                        subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
-                    pmhandler.HandlePMRequest(subq);
+                    try
+                    {
+                        string[] subq = query.Split('-');
+                        for (int i = 0; i < subq.Length; i++)
+                            subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
+                        pmhandler.HandlePMRequest(subq);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.Message);
+                    }
                 }
                 else if (query.StartsWith("sfc "))
                 {
-                    string[] subq = query.Split('-');
-                    for (int i = 0; i < subq.Length; i++)
-                        subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
-                    SFCHandler sfchandler = new SFCHandler();
-                    List<int> errors = sfchandler.HandleSFCRequest(subq);
-                    if (errors == null)
-                        continue;
-                    if (errors.Count == 0)
+                    try
                     {
-                        Log.Success("No errors detected!");
-                    }
-                    else
-                    {
-                        Log.Warning("Detected errors:");
-                        for (int i = 0; i < errors.Count; i++)
+                        string[] subq = query.Split('-');
+                        for (int i = 0; i < subq.Length; i++)
+                            subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
+                        SFCHandler sfchandler = new SFCHandler();
+                        List<int> errors = sfchandler.HandleSFCRequest(subq);
+                        if (errors == null)
+                            continue;
+                        if (errors.Count == 0)
                         {
-                            Log.Warning(ErrorIDs.Ids[errors[i]]);
+                            Log.Success("No errors detected!");
                         }
+                        else
+                        {
+                            Log.Warning("Detected errors:");
+                            for (int i = 0; i < errors.Count; i++)
+                            {
+                                Log.Warning(ErrorIDs.Ids[errors[i]]);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.Message);
                     }
                 }
                 else if (query.StartsWith("rm "))
                 {
-                    string[] subq = query.Split(' ');
-                    for (int i = 0; i < subq.Length; i++)
-                        subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
-                    RMHandler rmhandler = new RMHandler();
-                    rmhandler.HandleRMRequest(subq);
-                    rmhandler = null;
+                    try
+                    {
+                        string[] subq = query.Split(' ');
+                        for (int i = 0; i < subq.Length; i++)
+                            subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
+                        RMHandler rmhandler = new RMHandler();
+                        rmhandler.HandleRMRequest(subq);
+                        rmhandler = null;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.Message);
+                    }
                 }
                 else if (query.StartsWith("mkdir "))
                 {
-                    string[] subq = query.Split(' ');
-                    for (int i = 0; i < subq.Length; i++)
-                        subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
-                    MKDIRHandler mkdirhandler = new MKDIRHandler();
-                    mkdirhandler.HandleMKDIRRequest(subq);
+                    try
+                    {
+                        string[] subq = query.Split(' ');
+                        for (int i = 0; i < subq.Length; i++)
+                            subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
+                        MKDIRHandler mkdirhandler = new MKDIRHandler();
+                        mkdirhandler.HandleMKDIRRequest(subq);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.Message);
+                    }
                 }
                 else if (query == "ls")
                 {
-                    LSHandler lshandler = new LSHandler();
-                    lshandler.HandleLSRequest();
+                    try
+                    {
+                        LSHandler lshandler = new LSHandler();
+                        lshandler.HandleLSRequest();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.Message);
+                    }
                 }
                 else if (query == "su")
                 {
-                    SUHandler suhandler = new SUHandler();
-                    suhandler.HandleSURequest();
-                    Console.WriteLine("Now you are root!");
-                    suhandler = null;
+                    try
+                    {
+                        SUHandler suhandler = new SUHandler();
+                        suhandler.HandleSURequest();
+                        Console.WriteLine("Now you are root!");
+                        suhandler = null;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.Message);
+                    }
+                }
+                else if (query.StartsWith("cd "))
+                {
+                    try
+                    {
+                        string[] subq = query.Split(' ');
+                        CDHandler cdhandler = new CDHandler();
+                        cdhandler.HandleCDRequest(subq);
+                        cdhandler = null;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex.Message);
+                    }
+                }
+                else if (query.StartsWith("mv "))
+                {
+                    string[] subq = query.Split(' ');
+                    for (int i = 0; i < subq.Length; i++)
+                        subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
+                    MVHandler mvhandler = new MVHandler();
+                    mvhandler.HandleMVRequest(subq);
+                    mvhandler = null;
                 }
             }
         }

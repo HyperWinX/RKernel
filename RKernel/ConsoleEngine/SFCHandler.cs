@@ -167,9 +167,7 @@ namespace RKernel.ConsoleEngine
                         case 1097540862:
                             Log.Warning("Started recovering NoUserFile...");
                             File.Create("0:\\RKernel\\user.dat").Close();
-                            string usr = Kernel.UserName;
-                            string passwd = Kernel.Passwd;
-                            File.WriteAllLines("0:\\RKernel\\usr.dat", Kernel.usrlines);
+                            File.WriteAllLines("0:\\RKernel\\user.dat", Kernel.usrlines);
                             return null;
                     }
                     break;

@@ -28,14 +28,9 @@ namespace RKernel.ConsoleEngine
                 }
             try
             {
-                path = Kernel.currentPath + query[2];
+                path = Kernel.currentPath + query.Last();
             }
             catch
-            {
-                Log.Error("Cannot handle RM request: corrupted or incorrect request.");
-                return;
-            }
-            if (query.Length < 3)
             {
                 Log.Error("Cannot handle RM request: corrupted or incorrect request.");
                 return;
@@ -66,7 +61,7 @@ namespace RKernel.ConsoleEngine
                 {
                     if (Directory.Exists(path))
                     {
-                        if (Kernel.ProtectedPaths.Contains(path) && !Kernel.IsRoot)
+                        if (Kernel.ProtectedPaths.Contains(path.GetHashCode()) && !Kernel.IsRoot)
                         {
                             Log.Error("Not enough permissions to remove directory! Exiting...");
                             return;
@@ -88,7 +83,7 @@ namespace RKernel.ConsoleEngine
                 {
                     if (Directory.Exists(path))
                     {
-                        if (Kernel.ProtectedPaths.Contains(path) && !Kernel.IsRoot)
+                        if (Kernel.ProtectedPaths.Contains(path.GetHashCode()) && !Kernel.IsRoot)
                         {
                             Log.Error("Not enough permissions to remove directory! Exiting...");
                             return;
@@ -97,7 +92,7 @@ namespace RKernel.ConsoleEngine
                     }
                     else if (File.Exists(path))
                     {
-                        if (Kernel.ProtectedPaths.Contains(path) && !Kernel.IsRoot)
+                        if (Kernel.ProtectedPaths.Contains(path.GetHashCode()) && !Kernel.IsRoot)
                         {
                             Log.Error("Not enough permissions to remove file! Exiting...");
                             return;
