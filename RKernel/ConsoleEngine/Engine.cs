@@ -141,6 +141,11 @@ namespace RKernel.ConsoleEngine
                     mvhandler.HandleMVRequest(subq);
                     mvhandler = null;
                 }
+                else if (query.StartsWith("notepad "))
+                {
+                    NotepadLauncher notepadlauncher = new();
+                    notepadlauncher.Run(query.Split(' '));
+                }
             }
         }
     }
