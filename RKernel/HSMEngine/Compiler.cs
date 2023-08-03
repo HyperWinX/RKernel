@@ -5,16 +5,16 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace HASMEditorAndCompiler
+namespace RKernel.HSMEngine
 {
-    internal static class Compiler
+    internal class Compiler
     {
-        private static List<byte> externSection;
-        private static List<byte> dataSection;
-        private static List<byte> mainSection;
-        private static Dictionary<string, byte> registers;
-        private static List<string> externs;
-        public static void Init()
+        private List<byte> externSection;
+        private List<byte> dataSection;
+        private List<byte> mainSection;
+        private Dictionary<string, byte> registers;
+        private List<string> externs;
+        public void Init()
         {
             externSection = new List<byte>();
             dataSection = new List<byte>();
@@ -38,7 +38,7 @@ namespace HASMEditorAndCompiler
                 "beep"
             };
         }
-        public static void Compile(string targetfile, string outputto)
+        public void Compile(string targetfile, string outputto)
         {
             List<string> lines = File.ReadAllLines(targetfile).ToList();
             ClearEmptyLines(ref lines);
@@ -57,7 +57,7 @@ namespace HASMEditorAndCompiler
                     if (!externs.Contains(sline[1]))
                     {
                         //err
-                        Console.WriteLine("Cannot find extern");
+                        Console.WriteLine("Cannot find extern" + sline[1]);
                         return;
                     }
                     externSection.Add(0xFF);
@@ -79,7 +79,7 @@ namespace HASMEditorAndCompiler
                     {
                         //Log error
                         Console.WriteLine("Null variable name, compilation exited");
-                        Dispose();
+                        BufferFlush();
                         return;
                     }
                     dataSection.Add(0xE0);
@@ -96,7 +96,7 @@ namespace HASMEditorAndCompiler
                     {
                         //Log error
                         Console.WriteLine("Null variable name, compilation exited");
-                        Dispose();
+                        BufferFlush();
                         return;
                     }
                     dataSection.Add(0xD0);
@@ -210,6 +210,14 @@ namespace HASMEditorAndCompiler
             File.WriteAllBytes(outputto, finalfile.ToArray());
             finalfile.Clear();
         }
+        public void BufferFlush()
+        {
+            externSection = null;
+            dataSection = null;
+            mainSection = null;
+            registers = null;
+            externs = null;
+        }
         private static void ClearEmptyLines(ref List<string> lines)
         {
             for (int i = 0; i < lines.Count; i++)
@@ -221,7 +229,7 @@ namespace HASMEditorAndCompiler
                 }
             }
         }
-        private static void WriteVariableName(ref List<byte> mainSection, string varname)
+        private void WriteVariableName(ref List<byte> mainSection, string varname)
         {
             List<string> t = new List<string> { varname };
             ClearEmptyLines(ref t);
@@ -229,7 +237,7 @@ namespace HASMEditorAndCompiler
             {
                 //Log error
                 Console.WriteLine("Null variable name, compilation exited");
-                Dispose();
+                BufferFlush();
                 return;
             }
             mainSection.Add((byte)t[0].Length);
@@ -250,12 +258,6 @@ namespace HASMEditorAndCompiler
                 default:
                     return 0x00;
             }
-        }
-        private static void Dispose()
-        {
-            externSection.Clear(); externSection = null;
-            dataSection.Clear(); dataSection = null;
-            mainSection.Clear(); dataSection = null;
         }
     }
 }

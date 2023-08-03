@@ -19,7 +19,7 @@ namespace RKernel.ConsoleEngine
             foreach (var file in Directory.GetFiles(Kernel.currentPath))
             {
                 totalFiles++;
-                strings.Add($"<FILE>         {file.Substring(Kernel.currentPath.Length - 11)}");
+                strings.Add($"<FILE>         {file}");
             }
             foreach (var directory in Directory.GetDirectories(Kernel.currentPath))
             {
@@ -28,9 +28,7 @@ namespace RKernel.ConsoleEngine
             }
             Console.Write("\n");
             foreach (var line in strings)
-            {
                 Console.WriteLine(line);
-            }
             Console.WriteLine(new string(' ', 16 - totalFiles.ToString().Length) + totalFiles + " files");
             Console.WriteLine(new string(' ', 16 - totalFolders.ToString().Length) + totalFolders + " folders\n");
         }

@@ -1,5 +1,7 @@
-﻿using System;
+﻿using RKernel.HSMEngine;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -155,9 +157,20 @@ namespace RKernel.ConsoleEngine
                 {
                     RKernel.GUIEngine.MainGUI.InitializeGUI();
                 }
-                else if (query == "hsm")
+                else if (query.StartsWith("hsm "))
                 {
-
+                    string[] subq = query.Split(' ');
+                    for (int i = 0; i < subq.Length; i++)
+                        subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
+                    if (!File.Exists(subq[1]))
+                    {
+                        Log.Error("Cannot find file " + subq[1]);
+                        return;
+                    }
+                    Compiler compiler = new();
+                    compiler.Init();
+                    compiler.Compile(subq[1], subq[2]);
+                    compiler.BufferFlush();
                 }
             }
         }
