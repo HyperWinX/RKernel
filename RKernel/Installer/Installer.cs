@@ -1,4 +1,5 @@
 ﻿using Cosmos.System.FileSystem;
+using IL2CPU.API.Attribs;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -11,6 +12,8 @@ namespace RKernel.Installer
         private Disk disk;
         private ManagedPartition partition;
         private PGUIDriver driver;
+        [ManifestResourceStream(ResourceName = "RKernel.wallpaper.bmp")]
+        private static byte[] wallpaper;
         public Installer()
         {
             driver = new PGUIDriver();
@@ -64,16 +67,20 @@ namespace RKernel.Installer
             foreach (var file in Directory.GetFiles("0:\\"))
                 File.Delete(file);
             Console.SetCursorPosition(Console.CursorLeft - 2, Console.CursorTop);
-            Console.Write("25%");
+            Console.Write("20%");
             Directory.CreateDirectory(@"0:\RKernel");
             Console.SetCursorPosition(Console.CursorLeft - 3, Console.CursorTop);
-            Console.Write("50%");
+            Console.Write("40%");
             File.Create(@"0:\RKernel\currentinstall.dat").Close();
             File.WriteAllLines(@"0:\RKernel\currentinstall.dat", new string[2] { "OSname=RKernel", "Version=0.1a" });
             Console.SetCursorPosition(Console.CursorLeft - 3, Console.CursorTop);
-            Console.Write("75%");
+            Console.Write("60%");
             File.Create("0:\\RKernel\\user.dat").Close();
             File.WriteAllLines("0:\\RKernel\\user.dat", new string[3] { $"Username={userdata[0]}", $"Password={userdata[1]}", $"RootPassword={userdata[2]}" });
+            Console.SetCursorPosition(Console.CursorLeft - 3, Console.CursorTop);
+            Console.Write("80%");
+            Directory.CreateDirectory("0:\\RKernel\\data");
+            File.WriteAllBytes("0:\\RKernel\\data\\wallpaper.bmp", wallpaper);
             Console.SetCursorPosition(Console.CursorLeft - 3, Console.CursorTop);
             Console.WriteLine("100%");
             Console.WriteLine("Installation completed. Rebooting...");

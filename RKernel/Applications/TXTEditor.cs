@@ -458,7 +458,7 @@ namespace RKernel.Applications
                         string chr = FeditorTerminal();
                         if (!Int32.TryParse(chr, out int ascii))
                         {
-                            Console.Beep(300, 300);
+                            Console.Beep();
                         }
                         else
                         {

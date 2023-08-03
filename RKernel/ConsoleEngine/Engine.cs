@@ -146,6 +146,19 @@ namespace RKernel.ConsoleEngine
                     NotepadLauncher notepadlauncher = new();
                     notepadlauncher.Run(query.Split(' '));
                 }
+                else if (query.StartsWith("power "))
+                {
+                    PowerHandler powerhandler = new();
+                    powerhandler.HandlePowerRequest(query.Split(' '));
+                }
+                else if (query == "gui")
+                {
+                    RKernel.GUIEngine.MainGUI.InitializeGUI();
+                }
+                else if (query == "hsm")
+                {
+
+                }
             }
         }
     }

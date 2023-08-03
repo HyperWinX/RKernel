@@ -24,11 +24,23 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <None Remove="wallpaper.bmp" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="wallpaper.bmp" />
+    </ItemGroup>
+
+    <ItemGroup>
       <PackageReference Include="Cosmos.Build" Version="0.1.0-localbuild20230713083156">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="Cosmos.System2" Version="0.1.0-localbuild20230713083227" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="HSMEngine\" />
     </ItemGroup>
 
 </Project>

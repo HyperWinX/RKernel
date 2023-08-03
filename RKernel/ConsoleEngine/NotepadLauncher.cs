@@ -22,11 +22,11 @@ namespace RKernel.ConsoleEngine
             {
                 Notepad.Run(new string[2] { "notepad", query[1] });
             }
-            else
+            try
             {
-                Log.Error("Cannot find file!");
-                return;
-            }
+                File.Create(query[1]).Close();
+                Notepad.Run(new string[2] { "notepad", query[1] });
+            } catch { }
         }
     }
 }
