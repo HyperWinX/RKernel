@@ -12,18 +12,15 @@ namespace RKernel.Applications
         static string tosav;
         static string cursor = " ";
         public static string ver = "Notepad v0.2";
-        private static string CurrentDir
-        {
-            get => Kernel.currentPath;
-        }
+        private static string CurrentDir { get => Kernel.currentPath; }
 
         static ConsoleColor BarFg = ConsoleColor.Black;
-        static ConsoleColor BarBg = ConsoleColor.DarkCyan;
+        static ConsoleColor BarBg = ConsoleColor.Red;
         static ConsoleColor EnterBg = ConsoleColor.Black;
         static ConsoleColor EnterFg = ConsoleColor.White;
         static ConsoleColor EditorBg = ConsoleColor.Black;
         static ConsoleColor EditorFg = ConsoleColor.White;
-        static ConsoleColor MenuBg = ConsoleColor.DarkCyan;
+        static ConsoleColor MenuBg = ConsoleColor.Red;
         static ConsoleColor MenuFg = ConsoleColor.Black;
         public static string Run(string[] argv)
         {
@@ -92,22 +89,16 @@ namespace RKernel.Applications
                 for (int kk = 0; kk < arrow.Length; kk++)
                 {
                     if (Console.CursorTop == Console.WindowHeight - 1)
-                    {
                         break;
-                    }
                     Console.Write(arrow[kk]);
                 }
                 Console.SetCursorPosition(xint, yint);
                 Console.BackgroundColor = EditorFg;
                 Console.ForegroundColor = EditorBg;
                 if (arrow != "" && arrow[0] != '\n')
-                {
                     Console.Write(arrow[0]);
-                }
                 else
-                {
                     Console.Write(cursor);
-                }
                 xint = Console.CursorLeft;
                 yint = Console.CursorTop;
                 Console.SetCursorPosition(0, 0);
@@ -116,33 +107,9 @@ namespace RKernel.Applications
                 Console.BackgroundColor = EditorBg;
                 Console.ForegroundColor = EditorFg;
 
-                ConsoleKeyInfo input = new ConsoleKeyInfo();
-                input = Console.ReadKey(true);
-                if (repalcevars == true)
-                {
-                    if (tosav.Contains("%DATE%"))
-                    {
-                        var d = DateTime.Now.ToShortDateString();
-                        tosav = tosav.Replace("%DATE%", d.ToString());
-                    }
-                    else if (tosav.Contains("%TIME%"))
-                    {
-                        DateTime dt = DateTime.Now;
-                        var t = dt.ToShortTimeString();
-                        tosav = tosav.Replace("%TIME%", t.ToString());
-                    }
-                    else if (tosav.Contains("%NOW%"))
-                    {
-                        DateTime dt = DateTime.Now;
-
-                        tosav = tosav.Replace("%NOW%", dt.ToString());
-                    }
-                }
+                ConsoleKeyInfo input = Console.ReadKey(true);
                 if (input.Key == ConsoleKey.Enter)
-                {
                     tosav += "\n";
-
-                }
                 else if ((input.Modifiers & ConsoleModifiers.Control) != 0)
                 {
                     if ((input.Key & ConsoleKey.S) != 0)

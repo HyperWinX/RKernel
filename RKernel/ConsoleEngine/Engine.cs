@@ -34,6 +34,21 @@ namespace RKernel.ConsoleEngine
                         Log.Error(ex.Message);
                     }
                 }
+                else if (query.StartsWith("./"))
+                {
+                    if (File.Exists(Path.Combine(Kernel.currentPath, query.Substring(2))))
+                    {
+                        try
+                        {
+                            Runner.Run(Path.Combine(Kernel.currentPath, query.Substring(2)));
+                        } catch (Exception ex)
+                        {
+                            Log.Error(ex.Message);
+                        }
+                    }
+                    else
+                        Log.Error("Cannot start file: file not found!");
+                }
                 else if (query.StartsWith("sfc "))
                 {
                     try

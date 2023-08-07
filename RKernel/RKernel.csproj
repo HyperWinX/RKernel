@@ -39,8 +39,4 @@
       <PackageReference Include="Cosmos.System2" Version="0.1.0-localbuild20230713083227" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="HSMEngine\" />
-    </ItemGroup>
-
 </Project>

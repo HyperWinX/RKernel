@@ -5,6 +5,8 @@ using RKernel.Installer;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.NetworkInformation;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using Sys = Cosmos.System;
@@ -13,7 +15,7 @@ namespace RKernel
 {
     public class Kernel : Sys.Kernel
     {
-        public static Cosmos.System.FileSystem.CosmosVFS fs;
+        public static CosmosVFS fs;
         public static string OSname, Version, UserName, Passwd, RootPasswd;
         List<string> bootlog;
         public static string[] usrlines;
@@ -23,8 +25,7 @@ namespace RKernel
         public static List<int> ProtectedPaths;
         protected override void BeforeRun()
         {
-            try { fs = InitializeVFS(); bootlog.Add("VFS initialized"); } catch (Exception ex) { bootlog.Add("Cannot initialize VFS, error: " + ex.Message); bootlog.Add("Shutting down"); }
-            Console.Clear();
+            try { fs = InitializeVFS(); } catch { Log.Error("Cannot register VFS!"); Console.ReadKey(); }
             bootlog.Add("Disks found: " + fs.Disks.Count);
             if (fs.Disks.Count == 0)
             {
@@ -47,7 +48,7 @@ namespace RKernel
                 Console.WriteLine("No installed RKernel instances detected. Starting installer...");
                 bootlog.Add("Not found installation file. Starting installer...");
                 Thread.Sleep(2000);
-                RKernel.Installer.Installer installer = new RKernel.Installer.Installer();
+                Installer.Installer installer = new Installer.Installer();
                 installer.Run();
             }
             found = false;

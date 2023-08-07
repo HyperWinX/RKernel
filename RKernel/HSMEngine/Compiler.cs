@@ -9,17 +9,10 @@ namespace RKernel.HSMEngine
 {
     internal class Compiler
     {
-        private List<byte> externSection;
-        private List<byte> dataSection;
-        private List<byte> mainSection;
-        private Dictionary<string, byte> registers;
-        private List<string> externs;
-        public void Init()
-        {
-            externSection = new List<byte>();
-            dataSection = new List<byte>();
-            mainSection = new List<byte>();
-            registers = new Dictionary<string, byte>
+        private List<byte> externSection = new List<byte>();
+        private List<byte> dataSection = new List<byte>();
+        private List<byte> mainSection = new List<byte>();
+        private Dictionary<string, byte> registers = new Dictionary<string, byte>
             {
                 {"eax", 0xC0},
                 {"ebx", 0xC1},
@@ -31,12 +24,15 @@ namespace RKernel.HSMEngine
                 {"dx", 0xC7},
                 {"si", 0xC8}
             };
-            externs = new List<string>
+        private List<int> externs = new List<int>
             {
-                "print",
-                "read",
-                "beep"
+                "print".GetHashCode(),
+                "read".GetHashCode(),
+                "beep".GetHashCode()
             };
+        public void Init()
+        {
+            
         }
         public void Compile(string targetfile, string outputto)
         {
@@ -54,10 +50,10 @@ namespace RKernel.HSMEngine
                         Console.WriteLine("Incorrect arguments");
                         return;
                     }
-                    if (!externs.Contains(sline[1]))
+                    if (!externs.Contains(sline[1].GetHashCode()))
                     {
                         //err
-                        Console.WriteLine("Cannot find extern" + sline[1]);
+                        Console.WriteLine("Cannot find extern " + sline[1]);
                         return;
                     }
                     externSection.Add(0xFF);
