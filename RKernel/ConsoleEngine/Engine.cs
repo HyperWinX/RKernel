@@ -1,4 +1,5 @@
-﻿using RKernel.HSMEngine;
+﻿using Cosmos.HAL;
+using RKernel.HSMEngine;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,8 +41,11 @@ namespace RKernel.ConsoleEngine
                     {
                         try
                         {
-                            Runner.Run(Path.Combine(Kernel.currentPath, query.Substring(2)));
-                        } catch (Exception ex)
+                            Runner runner = new(Path.Combine(Kernel.currentPath, query.Substring(2)));
+                            runner.Load();
+                            runner.Run();
+                        }
+                        catch (Exception ex)
                         {
                             Log.Error(ex.Message);
                         }

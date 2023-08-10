@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 
 namespace RKernel.KernelFeatures
 {
-    internal class Config
+    public class Config
     {
         Dictionary<string, string> configuration;
         public Config(string filepath)
         {
             string[] lines = File.ReadAllLines(filepath);
+            configuration = new Dictionary<string, string>();
             foreach (string line in lines)
                 configuration.Add(line.Split('=')[0], line.Split('=')[1]);
         }

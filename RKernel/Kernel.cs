@@ -1,15 +1,12 @@
-﻿using Cosmos.HAL.Drivers.Video.SVGAII;
-using Cosmos.System.FileSystem;
+﻿using Cosmos.System.FileSystem;
 using RKernel.ConsoleEngine;
-using RKernel.Installer;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.NetworkInformation;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using Sys = Cosmos.System;
+using RKernel.KernelFeatures;
+using System.Linq;
 
 namespace RKernel
 {
@@ -17,20 +14,21 @@ namespace RKernel
     {
         public static CosmosVFS fs;
         public static string OSname, Version, UserName, Passwd, RootPasswd;
-        List<string> bootlog;
         public static string[] usrlines;
         public static string currentPath;
         public static string currentMode;
         public static bool IsRoot;
         public static List<int> ProtectedPaths;
+        public static Config UserConfig;
+        public static Config SystemConfig;
         protected override void BeforeRun()
         {
             try { fs = InitializeVFS(); } catch { Log.Error("Cannot register VFS!"); Console.ReadKey(); }
-            bootlog.Add("Disks found: " + fs.Disks.Count);
+            PrintDebug("Disks found: " + fs.Disks.Count);
             if (fs.Disks.Count == 0)
             {
                 Console.WriteLine("Drives not found! Cannot proceed.");
-                bootlog.Add("No drives found! Waiting for key press...");
+                PrintDebug("No drives found! Waiting for key press...");
                 Console.Write("Press any key to shutdown...");
                 Console.ReadKey();
                 Sys.Power.Shutdown();
@@ -42,11 +40,11 @@ namespace RKernel
                 if (File.Exists($"{i}:\\RKernel\\currentinstall.dat"))
                     found = true;
             if (found)
-                bootlog.Add("Found installation file. Continuing kernel startup...");
+                PrintDebug("Found installation file. Continuing kernel startup...");
             if (!found)
             {
                 Console.WriteLine("No installed RKernel instances detected. Starting installer...");
-                bootlog.Add("Not found installation file. Starting installer...");
+                PrintDebug("Not found installation file. Starting installer...");
                 Thread.Sleep(2000);
                 Installer.Installer installer = new Installer.Installer();
                 installer.Run();
@@ -57,37 +55,41 @@ namespace RKernel
                     found = true;
             if (!found)
             {
-                bootlog.Add("Not found user configuration file! Shutting down...");
+                PrintDebug("Not found user configuration file! Shutting down...");
                 File.Create("0:\\RKernel\\currentinstall.dat").Close();
                 File.WriteAllLines("0:\\RKernel\\currentinstall.dat", null);
-                File.WriteAllLines("0:\\RKernel\\currentinstall.dat", new string[1] { "corrupted" });
+                File.WriteAllLines("0:\\RKernel\\currentinstall.dat", new string[1] { "corrupted=1" });
                 RaiseCriticalKernelError("Can't find user configuration file!");
             }
-            string[] lines = File.ReadAllLines("0:\\RKernel\\currentinstall.dat");
-            if (lines.Length == 1 && lines[0] == "corrupted")
+            PrintDebug("Loading system config");
+            SystemConfig = new("0:\\RKernel\\currentinstall.dat");
+            if (SystemConfig.GetConfigEntries().Contains("corrupted"))
             {
                 Log.Warning("Previous installation was corrupted! Starting installer...");
                 Thread.Sleep(2000);
                 Installer.Installer installer = new Installer.Installer();
                 installer.Run();
             }
-            OSname = lines[0].Split('=')[1];
-            Version = lines[1].Split('=')[1];
-            bootlog.Add("Current OS name: " + OSname);
-            bootlog.Add("Current OS version: " + Version);
-            lines = File.ReadAllLines("0:\\RKernel\\user.dat");
-            if (lines.Length != 3)
+            PrintDebug("Loading system info");
+            OSname = SystemConfig.GetValue("OSname");
+            Version = SystemConfig.GetValue("Version");
+            PrintDebug("System info loaded");
+            PrintDebug("Current OS name: " + OSname);
+            PrintDebug("Current OS version: " + Version);
+            PrintDebug("Loading user data");
+            UserConfig = new("0:\\RKernel\\user.dat");
+            if (UserConfig.GetConfigEntries().Length != 3)
             {
                 File.WriteAllLines("0:\\RKernel\\user.dat", null);
-                File.WriteAllLines("0:\\RKernel\\user.dat", new string[1] { "corrupted" });
+                File.WriteAllLines("0:\\RKernel\\user.dat", new string[1] { "corrupted=1" });
                 RaiseCriticalKernelError("Corrupted user configuration file!");
             }
-            UserName = lines[0].Split('=')[1];
-            Passwd = lines[1].Split('=')[1];
-            RootPasswd = lines[2].Split('=')[1];
-            usrlines = lines;
+            PrintDebug("Loading config entries");
+            UserName = UserConfig.GetValue("Username");
+            Passwd = UserConfig.GetValue("Password");
+            RootPasswd = UserConfig.GetValue("RootPassword");
+            PrintDebug("User config loaded");
         }
-
         protected override void Run()
         {
             bool usr = false;
@@ -107,7 +109,7 @@ namespace RKernel
                 }
                 usr = true;
             }
-            bootlog.Add("Correct username was entered after " + its + " tries.");
+            PrintDebug("Correct username was entered after " + its + " tries.");
             its = 0;
             while (!passwd)
             {
@@ -123,11 +125,9 @@ namespace RKernel
                 }
                 passwd = true;
             }
-            bootlog.Add("Correct password was entered after " + its + " tries.");
+            PrintDebug("Correct password was entered after " + its + " tries.");
             //File.Create("0:\\RKernel\\log").Close();
             //File.WriteAllLines("0:\\RKernel\\log", bootlog.ToArray());
-            bootlog.Clear();
-            bootlog = null;
             Console.Clear();
             Console.WriteLine("Welcome to the " + OSname + " version " + Version + "\n");
             currentPath = "0:\\";

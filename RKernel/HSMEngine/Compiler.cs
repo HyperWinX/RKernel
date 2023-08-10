@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace RKernel.HSMEngine
 {
-    internal class Compiler
+    public class Compiler
     {
         private List<byte> externSection = new List<byte>();
         private List<byte> dataSection = new List<byte>();
@@ -32,7 +31,7 @@ namespace RKernel.HSMEngine
             };
         public void Init()
         {
-            
+
         }
         public void Compile(string targetfile, string outputto)
         {

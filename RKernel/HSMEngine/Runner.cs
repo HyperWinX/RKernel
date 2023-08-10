@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RKernel.HSMEngine;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
@@ -10,42 +11,73 @@ using System.Threading.Tasks;
 
 namespace RKernel.HSMEngine
 {
-    internal static class Runner
+    public class Runner
     {
-        private static Dictionary<int, List<byte>> Registers32bit = new Dictionary<int, List<byte>>
+        private Dictionary<int, List<byte>> Registers32bit;
+        private Dictionary<int, List<byte>> Registers16bit;
+        private Dictionary<int, List<byte>> OtherRegisters;
+        private Dictionary<int, string> RegisterNames;
+        private VirtualMemory Memory;
+        private List<byte> SupportedExternCodes;
+        private List<int> Externs;
+        private string _filepath;
+        private int pointer;
+        public Runner(string filepath)
         {
-            {"eax".GetHashCode(), new List<byte>(4)},
-            {"ebx".GetHashCode(), new List<byte>(4)},
-            {"ecx".GetHashCode(), new List<byte>(4)},
-            {"edx".GetHashCode(), new List<byte>(4)}
-        };
-        private static Dictionary<int, List<byte>> Registers16bit = new Dictionary<int, List<byte>>
+            Registers32bit = new Dictionary<int, List<byte>>
+            {
+                {"eax".GetHashCode(), new List<byte>(4)},
+                {"ebx".GetHashCode(), new List<byte>(4)},
+                {"ecx".GetHashCode(), new List<byte>(4)},
+                {"edx".GetHashCode(), new List<byte>(4)}
+            };
+            Registers16bit = new Dictionary<int, List<byte>>
+            {
+                {"ax".GetHashCode(), new List<byte>(2)},
+                {"bx".GetHashCode(), new List<byte>(2)},
+                {"cx".GetHashCode(), new List<byte>(2)},
+                {"dx".GetHashCode(), new List<byte>(2)}
+            };
+            OtherRegisters = new Dictionary<int, List<byte>>
+            {
+                {"si".GetHashCode(), new List<byte>(512)}
+            };
+            Memory = new VirtualMemory(65536);
+            SupportedExternCodes = new List<byte>
+            {
+                0xA0,
+                0xA1,
+                0xA2
+            };
+            RegisterNames = new Dictionary<int, string>
+            {
+                {"eax".GetHashCode(), "eax"},
+                {"ebx".GetHashCode(), "ebx"},
+                {"ecx".GetHashCode(), "ecx"},
+                {"edx".GetHashCode(), "edx"},
+                {"ax".GetHashCode(), "ax"},
+                {"bx".GetHashCode(), "bx"},
+                {"cx".GetHashCode(), "cx"},
+                {"dx".GetHashCode(), "dx"},
+                {"si".GetHashCode(), "si"}
+            };
+            Externs = new List<int>();
+            _filepath = filepath;
+            pointer = 0;
+        }
+        private bool Registers4BContains(int hashcode) => Registers32bit.Keys.ToArray().Contains(hashcode);
+        private bool Registers2BContains(int hashcode) => Registers16bit.Keys.ToArray().Contains(hashcode);
+        private bool OtherRegistersContains(int hashcode) => OtherRegisters.Keys.ToArray().Contains(hashcode);
+        public void Load()
         {
-            {"ax".GetHashCode(), new List<byte>(2)},
-            {"bx".GetHashCode(), new List<byte>(2)},
-            {"cx".GetHashCode(), new List<byte>(2)},
-            {"dx".GetHashCode(), new List<byte>(2)}
-        };
-        private static Dictionary<int, List<byte>> OtherRegisters = new Dictionary<int, List<byte>>
+            Stream file = File.OpenRead(_filepath);
+            for (int i = 0; i < file.Length; i++)
+                Memory[i] = (byte)file.ReadByte();
+            file.Close();
+        }
+        public void Run()
         {
-            {"si".GetHashCode(), new List<byte>(512)}
-        };
-        private static VirtualMemory Memory = new VirtualMemory(65536);
-        private static List<byte> SupportedExternCodes = new List<byte>
-        {
-            0xA0,
-            0xA1,
-            0xA2
-        };
-        private static List<int> Externs = new List<int>();
-        private static bool Registers4BContains(int hashcode) => Registers32bit.Keys.ToArray().Contains(hashcode);
-        private static bool Registers2BContains(int hashcode) => Registers16bit.Keys.ToArray().Contains(hashcode);
-        public static void Run(string filepath)
-        {
-            Memory.Load(File.ReadAllBytes(filepath), 0);
-            short pointer = 0x0000;
-            Registers4BContains(0);
-            Log.Warning("Runner initialized, starting execution...");
+            Console.WriteLine("Runner initialized, starting execution...");
             while (Memory[pointer] != 0xB2 && Memory[pointer + 1] != 0xBB)
             {
                 Console.WriteLine("Current byte: " + (pointer + 1) + " , " + Memory[pointer] + ", converted: " + $"0x{Memory[pointer].ToString("X2")}");
@@ -53,7 +85,7 @@ namespace RKernel.HSMEngine
                 {
                     if (!SupportedExternCodes.Contains(Memory[pointer + 1]))
                     {
-                        Log.Error("Unsupported extern code detected! Shutting down virtual environment...");
+                        Console.WriteLine("Unsupported extern code detected! Shutting down virtual environment...");
                         //TODO: disposing and cleaning up VE
                         return;
                     }
@@ -68,95 +100,101 @@ namespace RKernel.HSMEngine
                     {
                         string strtoset = "";
                         string r1 = DefineRegister(Memory[pointer + 1]);
-                        object[] register = new object[3] {string.IsNullOrWhiteSpace(r1) ? false : true, r1, string.IsNullOrWhiteSpace(r1) ? 0 : r1.GetHashCode() };
+                        object[] register = new object[3] { string.IsNullOrWhiteSpace(r1) ? false : true, r1, string.IsNullOrWhiteSpace(r1) ? 0 : r1.GetHashCode() };
                         Console.WriteLine("Register: " + r1);
                         Console.WriteLine(0xF0 + ", converted: " + $"0x{0xF0.ToString("X2")}");
                         Console.WriteLine(Memory[pointer + 2] + ", converted: " + $"0x{Memory[pointer + 2].ToString("X2")}");
-                        if (register == null && Memory[pointer + 2] == 0xF0)
+                        if ((bool)register[0])
                         {
-                            int length = Memory[pointer + 3];
-                            List<byte> str = new List<byte>();
-                            for (int i = 0; i < length; i++)
-                                str.Add(Memory[pointer + 3 + i]);
-                            strtoset = Encoding.ASCII.GetString(str.ToArray()).Substring(1, str.ToArray().Length - 2);
-                        }
-                        string r2 = DefineRegister(Memory[pointer + 2]);
-                        object[] register2 = new object[3] { string.IsNullOrWhiteSpace(r2) ? false : true, r2, string.IsNullOrWhiteSpace(r2) ? 0 : r2.GetHashCode() };
-                        Console.WriteLine("Defined second register: " + r2 + ", register code: " + Memory[pointer + 2].ToString("X2"));
-                        if (register == null && Memory[pointer + 2] != 0xF0)
-                        {
-                            Log.Error("Unknown register code, shutting down virtual environment...");
-                            //TODO: disposing and cleaning up
-                            return;
-                        }
-                        Log.Warning("Register check passed!");
-                        if ((bool)register[0] && (bool)register2[0])
-                        {
-                            if (Registers4BContains((int)register[2]) && Registers4BContains((int)register2[2]))
+                            pointer += 2;
+                            string r2 = DefineRegister(Memory[pointer]);
+                            object[] register2 = new object[3] { string.IsNullOrWhiteSpace(r2) ? false : true, r2, string.IsNullOrWhiteSpace(r2) ? 0 : r2.GetHashCode() };
+                            if ((bool)register2[0])
                             {
-                                Registers32bit[(int)register[2]] = Registers32bit[(int)register2[2]];
-                                Console.WriteLine("Moving " + register2 + " to register " + register);
-                                pointer += 3;
+                                if (Registers4BContains((int)register[2]) && Registers4BContains((int)register2[2]))
+                                {
+                                    Registers32bit[(int)register[2]] = Registers32bit[(int)register2[2]];
+                                    Console.WriteLine("Moving " + (string)register2[1] + " to register " + (string)register[1]);
+                                    pointer += 3;
+                                }
+                                else if (Registers2BContains((int)register[2]) && Registers2BContains((int)register2[2]))
+                                {
+                                    Registers16bit[(int)register[2]] = Registers16bit[(int)register2[2]];
+                                    Console.WriteLine("Moving " + (string)register2[1] + " to register " + (string)register[1]);
+                                    pointer += 3;
+                                }
+                                else if (Registers2BContains((int)register[2]) && Registers4BContains((int)register2[2]))
+                                {
+                                    SetRegisterValue((int)register[2], new List<byte>(2) { Registers32bit[(int)register[2]][2], Registers32bit[(int)register[2]][3] });
+                                    pointer += 3;
+                                }
+                                else if (Registers4BContains((int)register[2]) && Registers2BContains((int)register2[2]))
+                                {
+                                    SetRegisterValue((int)register[2], Registers32bit[(int)register2[2]]);
+                                    pointer += 3;
+                                }
+                                else
+                                    throw new Exception("Unknown register code!");
+                                pointer++;
                             }
-                            else if (Registers2BContains((int)register[2]) && Registers2BContains((int)register2[2]))
+                            else if (!(bool)register2[0])
                             {
-                                Registers16bit[(int)register[2]] = Registers16bit[(int)register2[2]];
-                                Console.WriteLine("Moving " + register2 + " to register " + register);
-                                pointer += 3;
+                                if (Memory[pointer] == 0xB1)
+                                {
+                                    SetRegisterValueFromMemoryCell(GetMemoryAddress(pointer + 1), (int)register[2]);
+                                    pointer += 3;
+                                }
+                                else if (Memory[pointer] == 0xB0)
+                                {
+                                    Console.WriteLine("Detected data start");
+                                    List<byte> value = new List<byte>();
+                                    int count = Memory[pointer + 1];
+                                    for (int i = 0; i < count; i++)
+                                        value.Add(Memory[pointer + 2 + i]);
+                                    SetRegisterValue((int)register[2], value);
+                                    pointer += (short)(2 + count);
+                                }
+                                else if (Memory[pointer] == 0xF0)
+                                {
+                                    Console.WriteLine("Detected string start");
+                                    int length = Memory[pointer + 1];
+                                    List<byte> str = new List<byte>();
+                                    for (int i = 0; i < length; i++)
+                                        str.Add(Memory[pointer + 2 + i]);
+                                    SetRegisterValue((int)register[2], Encoding.ASCII.GetBytes(Encoding.ASCII.GetString(str.ToArray())).ToList());
+                                    pointer += (short)(2 + length);
+                                }
+                                else
+                                    throw new Exception("Unsupported data type!");
                             }
-                            else if (Registers2BContains((int)register[2]) && Registers4BContains((int)register2[2]))
+                        }
+                        else if (!(bool)register[0])
+                        {
+                            string r2 = DefineRegister(Memory[pointer + 2]);
+                            object[] register2 = new object[3] { string.IsNullOrWhiteSpace(r2) ? false : true, r2, string.IsNullOrWhiteSpace(r2) ? 0 : r2.GetHashCode() };
+                            if ((bool)register2[0])
                             {
-                                SetRegisterValue((int)register[2], new List<byte>(2) { Registers32bit[(int)register[2]][2], Registers32bit[(int)register[2]][3] });
-                                pointer += 3;
+                                if (Memory[pointer + 1] == 0xB1)
+                                {
+                                    int memoryAddress = BitConverter.ToInt16(new byte[2] { Memory[pointer + 2], Memory[pointer + 3] }, 0);
+                                    SetMemoryCellValueFromRegister(memoryAddress, (int)register2[2]);
+                                }
                             }
-                            else if (Registers4BContains((int)register[2]) && Registers2BContains((int)register2[2]))
+                            else if (!(bool)register2[0])
                             {
-                                SetRegisterValue((int)register[2], Registers32bit[(int)register2[2]]);
-                                pointer += 3;
-                            }
-                            else
-                                throw new Exception("You are lucky, you got inaccessible exception!");
-                        }
-                        else if (!(bool)register[0] && (bool)register2[0])
-                        {
-                            if (Memory[pointer + 1] == 0xB1)
-                            {
-                                int memoryAddress = BitConverter.ToInt16(new byte[2] { Memory[pointer + 2], Memory[pointer + 3] });
-                                
+                                if (Memory[pointer + 1] == 0xB1)
+                                {
+                                    int memoryAddress = GetMemoryAddress(pointer + 2);
+                                }
                             }
                         }
-                        else if (Registers4BContains((int)register[2]) && Memory[pointer + 2] == 0xB0)
-                        {
-                            Console.WriteLine("Detected data start");
-                            List<byte> value = new List<byte>();
-                            int count = Memory[pointer + 3];
-                            for (int i = 0; i < count; i++)
-                                value.Add(Memory[pointer + 4 + i]);
-                            SetRegisterValue(register, value);
-                            pointer += (Int16)(4 + count);
-                        }
-                        else if (Registers32bit.Keys.ToArray().Contains(register.GetHashCode()) && strtoset != "")
-                        {
-                            Console.WriteLine("null");
-                        }
-                        else if (OtherRegisters.Keys.ToArray().Contains(register.GetHashCode()) && Memory[pointer + 2] == 0xF0)
-                        {
-                            int count = Memory[pointer + 3];
-                            List<byte> str = new List<byte>();
-                            for (int i = 4; i < count; i++)
-                                str.Add(Memory[pointer + i]);
-                            str.RemoveAt(str.Count - 1);
-                            SetRegisterValue(register, str);
-                            pointer += (Int16)(4 + count);
-                        }
-                        Log.Warning("Bro, i cant handle this fucking (byte)shit");
                     }
                 }
                 else if (Memory[pointer] == 0xA0)
                 {
                     if (!Externs.Contains("print".GetHashCode()))
                     {
-                        Log.Error("Cannot find extern, shutting down virtual environment...");
+                        Console.WriteLine("Cannot find extern, shutting down virtual environment...");
                         return;
                     }
                     if (Registers32bit["eax".GetHashCode()].Count != 4)
@@ -164,27 +202,27 @@ namespace RKernel.HSMEngine
                         foreach (byte b in Registers32bit["eax".GetHashCode()])
                             Console.WriteLine(b);
                         //err
-                        Log.Error("Cannot read eax value for print extern execution, shutting down virtual environment...");
+                        Console.WriteLine("Cannot read eax value for print extern execution, shutting down virtual environment...");
                         return;
                     }
                     if (Registers32bit["ebx".GetHashCode()].Count != 4)
                     {
                         //err
-                        Log.Error("Cannot read ebx value for print extern execution, shutting down virtual environment...");
+                        Console.WriteLine("Cannot read ebx value for print extern execution, shutting down virtual environment...");
                         return;
                     }
                     ConsoleColor ForegroundColor = DefineForegroundColor(Registers32bit["eax".GetHashCode()]);
                     if (ForegroundColor == ConsoleColor.Black)
                     {
                         //err
-                        Log.Error("Cannot define foreground color, shutting down virtual environment...");
+                        Console.WriteLine("Cannot define foreground color, shutting down virtual environment...");
                         return;
                     }
                     ConsoleColor BackgroundColor = DefineBackgroundColor(Registers32bit["ebx".GetHashCode()]);
                     if (BackgroundColor == ConsoleColor.White)
                     {
                         //err
-                        Log.Error("Cannot define background color, shutting down virtual environment...");
+                        Console.WriteLine("Cannot define background color, shutting down virtual environment...");
                         return;
                     }
                     string str = Encoding.ASCII.GetString(OtherRegisters["si".GetHashCode()].ToArray());
@@ -211,7 +249,7 @@ namespace RKernel.HSMEngine
                     return;
             }
         }
-        private static string DefineRegister(byte b)
+        private string DefineRegister(byte b)
         {
             switch (b)
             {
@@ -237,7 +275,7 @@ namespace RKernel.HSMEngine
                     return null;
             }
         }
-        private static byte[] ConvertStringToByte(string bytestr)
+        private byte[] ConvertStringToByte(string bytestr)
         {
             int length = (bytestr.Length - 2) / 2;
             byte[] byteArray = new byte[length];
@@ -250,7 +288,7 @@ namespace RKernel.HSMEngine
 
             return byteArray;
         }
-        private static string DefineExternType(byte externbyte)
+        private string DefineExternType(byte externbyte)
         {
             switch (externbyte)
             {
@@ -264,7 +302,7 @@ namespace RKernel.HSMEngine
                     return null;
             }
         }
-        private static ConsoleColor DefineForegroundColor(List<byte> bytes)
+        private ConsoleColor DefineForegroundColor(List<byte> bytes)
         {
             Console.WriteLine(bytes[0]);
             Console.WriteLine(bytes[1]);
@@ -293,7 +331,7 @@ namespace RKernel.HSMEngine
             else
                 return ConsoleColor.Black;
         }
-        private static ConsoleColor DefineBackgroundColor(List<byte> bytes)
+        private ConsoleColor DefineBackgroundColor(List<byte> bytes)
         {
             if (bytes[0] == 0x00 &&
                 bytes[1] == 0x00 &&
@@ -318,15 +356,15 @@ namespace RKernel.HSMEngine
             else
                 return ConsoleColor.White;
         }
-        private static void ResetRegister(string register)
+        private void ResetRegister(string register)
         {
 
         }
-        private static void SetRegisterValue(int register, List<byte> value)
+        private void SetRegisterValue(int register, List<byte> value)
         {
             if (register == "eax".GetHashCode() || register == "ebx".GetHashCode() || register == "ecx".GetHashCode() || register == "edx".GetHashCode())
             {
-                Console.WriteLine("Setting register " + register + "");
+                Console.WriteLine("Setting register " + RegisterNames[register] + "");
                 Console.WriteLine($"{value[0]} {value[1]} {value[2]} {value[3]}");
                 if (value.Count == 4)
                     Registers32bit[register.GetHashCode()] = value;
@@ -357,23 +395,29 @@ namespace RKernel.HSMEngine
                 }
             }
             else if (register == "si".GetHashCode())
-            {
                 OtherRegisters[register.GetHashCode()] = value;
-            }
             else
             {
                 //err
                 Console.WriteLine("Cannot find register");
             }
         }
-        private static void SetMemoryCellValueFromRegister(int memAddr, int registerHashCode)
+        private void SetMemoryCellValueFromRegister(int memAddr, int registerHashCode)
         {
-            if (Registers4BContains(registerHashCode))
-                Memory[memAddr] = Registers32bit[registerHashCode][3];
-            else if (Registers2BContains(registerHashCode))
-                Memory[memAddr] = Registers16bit[registerHashCode][1];
+            if (Registers4BContains(registerHashCode) || Registers2BContains(registerHashCode))
+                Memory[memAddr] = Registers32bit[registerHashCode][0];
             else
                 throw new Exception("Unknown or unsupported register code!");
         }
+        private void SetRegisterValueFromMemoryCell(int memAddr, int registerHashCode)
+        {
+            if (Registers4BContains(registerHashCode))
+                Registers32bit[registerHashCode][0] = Memory[memAddr];
+            else if (Registers2BContains(registerHashCode))
+                Registers16bit[registerHashCode][0] = Memory[memAddr];
+            else
+                throw new Exception("Invalid register code!");
+        }
+        private short GetMemoryAddress(int startMemAddr) => BitConverter.ToInt16(new byte[2] { Memory[startMemAddr], Memory[startMemAddr + 1] }, 0);
     }
 }

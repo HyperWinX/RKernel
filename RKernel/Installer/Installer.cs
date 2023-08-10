@@ -79,8 +79,8 @@ namespace RKernel.Installer
             File.WriteAllLines("0:\\RKernel\\user.dat", new string[3] { $"Username={userdata[0]}", $"Password={userdata[1]}", $"RootPassword={userdata[2]}" });
             Console.SetCursorPosition(Console.CursorLeft - 3, Console.CursorTop);
             Console.Write("80%");
-            Directory.CreateDirectory("0:\\RKernel\\data");
-            File.WriteAllBytes("0:\\RKernel\\data\\wallpaper.bmp", wallpaper);
+            //Directory.CreateDirectory("0:\\RKernel\\data");
+            //File.WriteAllBytes("0:\\RKernel\\data\\wallpaper.bmp", wallpaper);
             Console.SetCursorPosition(Console.CursorLeft - 3, Console.CursorTop);
             Console.WriteLine("100%");
             Console.WriteLine("Installation completed. Rebooting...");
