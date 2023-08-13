@@ -6,12 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RKernel.ConsoleEngine
+namespace RKernel.ConsoleEngine.Commands
 {
-    public class LSHandler
+    public static class LSHandler
     {
-        public LSHandler() { }
-        public void HandleLSRequest()
+        public static void HandleLSRequest(string query)
         {
             int totalFiles = 0;
             int totalFolders = 0;

@@ -7,14 +7,35 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RKernel.ConsoleEngine
+namespace RKernel.ConsoleEngine.Commands
 {
-    internal class SFCHandler
+    public static class SFCHandler
     {
-        List<int> errorIDs;
-        public SFCHandler() { errorIDs = new List<int>(); }
-        public List<int> HandleSFCRequest(string[] query)
+        private static List<int> errorIDs = new List<int>();
+        public static void HandleSFCRequest(string quer)
         {
+            try
+            {
+                List<int> errors = SFC(quer);
+                if (errors == null)
+                    return;
+                if (errors.Count == 0)
+                    Log.Warning("No errors detected!");
+                else
+                {
+                    Log.Warning("Detected errors:");
+                    for (int i = 0; i < errors.Count; i++)
+                        Log.Warning(ErrorIDs.Ids[errors[i]]);
+                }
+            }
+            catch
+            {
+                Log.Error("SFC run failure!");
+            }
+        }
+        private static List<int> SFC(string quer)
+        {
+            string[] query = quer.Split(" -", StringSplitOptions.None);
             if (query[0] != "sfc")
             {
                 Log.Error("Cannot handle SFC request: corrupted or incorrect request.");
@@ -107,14 +128,12 @@ namespace RKernel.ConsoleEngine
                     return errorIDs;
                 case "repair":
                     Log.Warning("Running verification...");
-                    SFCHandler sfchandler = new SFCHandler();
-                    List<int> errors = sfchandler.HandleSFCRequest(new string[2] { "sfc", "verify" });
+                    List<int> errors = SFC("sfc -verify");
                     if (errors.Count == 0)
                     {
                         Log.Success("No repair needed!");
                         return null;
                     }
-                    sfchandler = null;
                     switch (errors[0])
                     {
                         case 1188118005:
@@ -137,7 +156,7 @@ namespace RKernel.ConsoleEngine
                             Log.Warning("Recovering system files...");
                             Directory.CreateDirectory("0:\\RKernel");
                             File.Create("0:\\RKernel\\currentinstall.dat");
-                            File.WriteAllLines("0:\\RKernel\\currentinstall.dat", new string[2] {"OSname=RKernel", "Version=0.1a"});
+                            File.WriteAllLines("0:\\RKernel\\currentinstall.dat", new string[2] { "OSname=RKernel", "Version=0.1a" });
                             Log.Warning("Recovering completed, please restart system.");
                             return null;
                         case 2078965517:

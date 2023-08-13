@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RKernel.ConsoleEngine
+namespace RKernel.ConsoleEngine.Commands
 {
-    public class CDHandler
+    public static class CDHandler
     {
-        public CDHandler() { }
-        public void HandleCDRequest(string[] query)
+        public static void HandleCDRequest(string quer)
         {
+            string[] query = quer.Split(' '); 
             if (query[0] != "cd")
             {
                 Log.Error("Cannot handle CD request: corrupted, or incorrect request.");

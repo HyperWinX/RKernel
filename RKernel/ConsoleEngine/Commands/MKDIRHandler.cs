@@ -1,13 +1,13 @@
 ﻿using System;
 using System.IO;
 
-namespace RKernel.ConsoleEngine
+namespace RKernel.ConsoleEngine.Commands
 {
-    public class MKDIRHandler
+    public static class MKDIRHandler
     {
-        public MKDIRHandler() { }
-        public void HandleMKDIRRequest(string[] query)
+        public static void HandleMKDIRRequest(string quer)
         {
+            string[] query = quer.Split(' ');
             if (query[0] != "mkdir")
             {
                 Log.Error("Cannot handle MKDIR request: corrupted, or incorrect request.");

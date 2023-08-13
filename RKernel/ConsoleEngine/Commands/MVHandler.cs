@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RKernel.ConsoleEngine
+namespace RKernel.ConsoleEngine.Commands
 {
-    public class MVHandler
+    public static class MVHandler
     {
-        public MVHandler() { }
-        public void HandleMVRequest(string[] query)
+        public static void HandleMVRequest(string quer)
         {
+            string[] query = quer.Split(' ');
             if (query.Length != 3 || query[0].GetHashCode() != "mv".GetHashCode())
             {
                 Log.Error("Cannot handle MV request: corrupted, or incorrect request.");

@@ -6,13 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RKernel.ConsoleEngine
+namespace RKernel.ConsoleEngine.Commands
 {
-    public class NotepadLauncher
+    public static class NotepadLauncher
     {
-        public NotepadLauncher() { }
-        public void Run(string[] query)
+        public static void Run(string quer)
         {
+            string[] query = quer.Split(' ');
             if (query.Length != 2)
             {
                 Log.Error("Cannot launch notepad: argument parsing failed.");
@@ -26,7 +26,8 @@ namespace RKernel.ConsoleEngine
             {
                 File.Create(query[1]).Close();
                 Notepad.Run(new string[2] { "notepad", query[1] });
-            } catch { }
+            }
+            catch { }
         }
     }
 }

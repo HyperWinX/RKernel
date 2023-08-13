@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RKernel.ConsoleEngine
+namespace RKernel.ConsoleEngine.Commands
 {
-    public class RMHandler
+    public static class RMHandler
     {
-        public RMHandler() { }
-        public void HandleRMRequest(string[] query)
+        public static void HandleRMRequest(string quer)
         {
+            string[] query = quer.Split(' ');
             if (query.Length < 2 || query.Length > 3)
             {
                 Log.Error("Cannot handle RM request: corrupted or incorrect request.");
@@ -105,7 +105,8 @@ namespace RKernel.ConsoleEngine
                         return;
                     }
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Log.Error("Unknown exception: \n");
                 Log.Error(ex.Message);

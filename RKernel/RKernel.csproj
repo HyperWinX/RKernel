@@ -21,6 +21,7 @@
         <CompressionType>Gzip</CompressionType>
         <DebugEnabled>False</DebugEnabled>
         <CompileVBEMultiboot>False</CompileVBEMultiboot>
+        <VMWareEdition>Player</VMWareEdition>
     </PropertyGroup>
 
     <ItemGroup>

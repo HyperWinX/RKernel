@@ -6,13 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RKernel.ConsoleEngine
+namespace RKernel.ConsoleEngine.Commands
 {
-    internal class PMHandler
+    public static class PMHandler
     {
-        public PMHandler() { }
-        public void HandlePMRequest(string[] query)
+        public static void HandlePMRequest(string quer)
         {
+            string[] query = quer.Split(" -", StringSplitOptions.None);
             if (query[0] != "pm")
             {
                 Log.Error("Cannot handle PM request: corrupted, or incorrect request.");
@@ -271,7 +271,8 @@ namespace RKernel.ConsoleEngine
                         }
                         Console.Write("\n");
                         return;
-                    } catch { }
+                    }
+                    catch { }
                     break;
             }
         }

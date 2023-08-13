@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RKernel.ConsoleEngine
+namespace RKernel.ConsoleEngine.Commands
 {
-    public class SUHandler
+    public static class SUHandler
     {
-        public SUHandler() { }
-        public void HandleSURequest()
+        public static void HandleSURequest(string quer)
         {
             bool valid = false;
             while (!valid)

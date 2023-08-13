@@ -114,8 +114,7 @@ namespace RKernel.Applications
                 {
                     if ((input.Key & ConsoleKey.S) != 0)
                     {
-                        File.Delete(@PATH);
-                        File.AppendAllText(@PATH, tosav + arrow);
+                        File.WriteAllText(@PATH, tosav + arrow);
                         old = tosav + arrow;
                     }
                 }
@@ -219,8 +218,7 @@ namespace RKernel.Applications
                     input = Console.ReadKey();
                     if (input.Key == ConsoleKey.S)
                     {
-                        File.Delete(@PATH);
-                        File.AppendAllText(@PATH, tosav + arrow);
+                        File.WriteAllText(@PATH, tosav + arrow);
                         old = tosav + arrow;
                     }
                     else if (input.Key == ConsoleKey.O)

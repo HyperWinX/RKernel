@@ -1,6 +1,9 @@
 ﻿using Cosmos.HAL;
+using Cosmos.System.Graphics;
+using RKernel.ConsoleEngine.Commands;
 using RKernel.HSMEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,185 +15,56 @@ namespace RKernel.ConsoleEngine
 {
     public class Engine
     {
-        private PMHandler pmhandler;
-        public Engine() { pmhandler = new PMHandler(); }
+        private Dictionary<string, Action<string>> _commands;
+        public Engine() { }
 
+        public void RegisterCommands()
+        {
+            _commands = new Dictionary<string, Action<string>>
+            {
+                {"cd", CDHandler.HandleCDRequest },
+                {"ls", LSHandler.HandleLSRequest },
+                {"mkdir", MKDIRHandler.HandleMKDIRRequest },
+                {"mv", MVHandler.HandleMVRequest },
+                {"notepad", NotepadLauncher.Run },
+                {"pm", PMHandler.HandlePMRequest },
+                {"power", PowerHandler.HandlePowerRequest },
+                {"rm", RMHandler.HandleRMRequest },
+                {"su", SUHandler.HandleSURequest },
+                {"hsm", CompilerHandler.HandleCompilationRequest },
+                {"sfc", SFCHandler.HandleSFCRequest },
+                {"ctl", CTLHandler.HandleCTLRequest }
+            };
+        }
         public void RunEngine()
         {
             while (true)
             {
                 Console.Write(Kernel.currentPath + "> ");
-                string query = Console.ReadLine();
-                if (query.StartsWith("pm "))
+                HandleCommand(Console.ReadLine());
+            }
+        }
+        public void HandleCommand(string command)
+        {
+            try
+            {
+                if (command.StartsWith("./"))
                 {
-                    try
+                    if (File.Exists(Path.Combine(Kernel.currentPath, command.Substring(2))))
                     {
-                        string[] subq = query.Split('-');
-                        for (int i = 0; i < subq.Length; i++)
-                            subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
-                        pmhandler.HandlePMRequest(subq);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex.Message);
-                    }
-                }
-                else if (query.StartsWith("./"))
-                {
-                    if (File.Exists(Path.Combine(Kernel.currentPath, query.Substring(2))))
-                    {
-                        try
-                        {
-                            Runner runner = new(Path.Combine(Kernel.currentPath, query.Substring(2)));
-                            runner.Load();
-                            runner.Run();
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Error(ex.Message);
-                        }
+                        Runner runner = new(Path.Combine(Kernel.currentPath, command.Substring(2)), Kernel.IsDebugMode, Kernel.RunnerMemorySize);
+                        runner.Load();
+                        runner.Run();
                     }
                     else
                         Log.Error("Cannot start file: file not found!");
+                    return;
                 }
-                else if (query.StartsWith("sfc "))
-                {
-                    try
-                    {
-                        string[] subq = query.Split('-');
-                        for (int i = 0; i < subq.Length; i++)
-                            subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
-                        SFCHandler sfchandler = new SFCHandler();
-                        List<int> errors = sfchandler.HandleSFCRequest(subq);
-                        if (errors == null)
-                            continue;
-                        if (errors.Count == 0)
-                        {
-                            Log.Success("No errors detected!");
-                        }
-                        else
-                        {
-                            Log.Warning("Detected errors:");
-                            for (int i = 0; i < errors.Count; i++)
-                            {
-                                Log.Warning(ErrorIDs.Ids[errors[i]]);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex.Message);
-                    }
-                }
-                else if (query.StartsWith("rm "))
-                {
-                    try
-                    {
-                        string[] subq = query.Split(' ');
-                        for (int i = 0; i < subq.Length; i++)
-                            subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
-                        RMHandler rmhandler = new RMHandler();
-                        rmhandler.HandleRMRequest(subq);
-                        rmhandler = null;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex.Message);
-                    }
-                }
-                else if (query.StartsWith("mkdir "))
-                {
-                    try
-                    {
-                        string[] subq = query.Split(' ');
-                        for (int i = 0; i < subq.Length; i++)
-                            subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
-                        MKDIRHandler mkdirhandler = new MKDIRHandler();
-                        mkdirhandler.HandleMKDIRRequest(subq);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex.Message);
-                    }
-                }
-                else if (query == "ls")
-                {
-                    try
-                    {
-                        LSHandler lshandler = new LSHandler();
-                        lshandler.HandleLSRequest();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex.Message);
-                    }
-                }
-                else if (query == "su")
-                {
-                    try
-                    {
-                        SUHandler suhandler = new SUHandler();
-                        suhandler.HandleSURequest();
-                        Console.WriteLine("Now you are root!");
-                        suhandler = null;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex.Message);
-                    }
-                }
-                else if (query.StartsWith("cd "))
-                {
-                    try
-                    {
-                        string[] subq = query.Split(' ');
-                        CDHandler cdhandler = new CDHandler();
-                        cdhandler.HandleCDRequest(subq);
-                        cdhandler = null;
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error(ex.Message);
-                    }
-                }
-                else if (query.StartsWith("mv "))
-                {
-                    string[] subq = query.Split(' ');
-                    for (int i = 0; i < subq.Length; i++)
-                        subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
-                    MVHandler mvhandler = new MVHandler();
-                    mvhandler.HandleMVRequest(subq);
-                    mvhandler = null;
-                }
-                else if (query.StartsWith("notepad "))
-                {
-                    NotepadLauncher notepadlauncher = new();
-                    notepadlauncher.Run(query.Split(' '));
-                }
-                else if (query.StartsWith("power "))
-                {
-                    PowerHandler powerhandler = new();
-                    powerhandler.HandlePowerRequest(query.Split(' '));
-                }
-                else if (query == "gui")
-                {
-                    RKernel.GUIEngine.MainGUI.InitializeGUI();
-                }
-                else if (query.StartsWith("hsm "))
-                {
-                    string[] subq = query.Split(' ');
-                    for (int i = 0; i < subq.Length; i++)
-                        subq[i] = Tools.Tools.RemoveSpaces(subq[i]);
-                    if (!File.Exists(subq[1]))
-                    {
-                        Log.Error("Cannot find file " + subq[1]);
-                        return;
-                    }
-                    Compiler compiler = new();
-                    compiler.Init();
-                    compiler.Compile(subq[1], subq[2]);
-                    compiler.BufferFlush();
-                }
+                _commands[command.Split(' ')[0]](command);
+            }
+            catch
+            {
+                Log.Error("Command handling failure!");
             }
         }
     }
