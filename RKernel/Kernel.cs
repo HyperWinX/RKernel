@@ -66,7 +66,7 @@ namespace RKernel
         {
             bool usr = false;
             bool passwd = false;
-            int its = 0;
+            int tries = 0;
             while (!usr)
             {
                 Console.Write("Enter username: ");
@@ -76,13 +76,13 @@ namespace RKernel
                     Log.Error("Incorrect username!");
                     Thread.Sleep(2000);
                     Console.Clear();
-                    its++;
+                    tries++;
                     continue;
                 }
                 usr = true;
             }
-            PrintDebug("Correct username was entered after " + its + " tries.");
-            its = 0;
+            PrintDebug("Correct username was entered after " + tries + " tries.");
+            tries = 0;
             while (!passwd)
             {
                 Console.Write("Enter password: ");
@@ -92,12 +92,12 @@ namespace RKernel
                     Log.Error("Incorrect password!");
                     Thread.Sleep(2000);
                     Console.Clear();
-                    its++;
+                    tries++;
                     continue;
                 }
                 passwd = true;
             }
-            PrintDebug("Correct password was entered after " + its + " tries.");
+            PrintDebug("Correct password was entered after " + tries + " tries.");
             //File.Create("0:\\RKernel\\log").Close();
             //File.WriteAllLines("0:\\RKernel\\log", bootlog.ToArray());
             Console.Clear();
