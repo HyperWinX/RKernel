@@ -1,5 +1,5 @@
 <h1 align="center">RKernel</h1>
-<h3 align="center">Revolutional Cosmos Kernel (in development)</h3>
+<h3 align="center">Revolutional Cosmos Kernel (project discontinued)</h3>
 
 It's a simple (at the moment) operating system, based on Cosmos C# project.
 
